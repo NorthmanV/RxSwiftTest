@@ -14,6 +14,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         startExamples()
+        subjectsExamples()
     }
     
     func startExamples() {
@@ -136,6 +137,92 @@ class ViewController: UIViewController {
 //            next(30)
 //            completed
         }
+        
+    }
+    
+    func subjectsExamples() {
+        
+        // Represents an object that is both an observable sequence as well as an observer.
+        example("Publish Subject") {
+            let disposableBag = DisposeBag()
+            let subject = PublishSubject<String>()
+            
+            subject.subscribe { print("Subscription first:", $0) }.disposed(by: disposableBag)
+            subject.on(.next("Hello"))
+            subject.onNext("RxSwift")
+            
+            subject.subscribe(onNext: {print("Subscription second:", $0)}).disposed(by: disposableBag)
+            subject.onNext("Wow")
+            subject.onNext("How are you?")
+            
+            subject.onCompleted() // or error end sequence
+            subject.onNext("I am here")
+            
+//            Subscription first: next(Hello)
+//            Subscription first: next(RxSwift)
+//            Subscription first: next(Wow)
+//            Subscription second: Wow
+//            Subscription first: next(How are you?)
+//            Subscription second: How are you?
+        }
+        
+        // Represents a value that changes over time.
+        example("Behavior Subject") {
+            let disposableBag = DisposeBag()
+            let subject = BehaviorSubject(value: 1)
+            
+            subject.subscribe(onNext: {print(#line, $0)}).disposed(by: disposableBag)
+            subject.onNext(2)
+            subject.onNext(3)
+            
+            subject.subscribe(onNext: {print(#line, $0)}).disposed(by: disposableBag)
+//            173 1
+//            173 2
+//            173 3
+//            177 3
+        }
+        
+        example("Replay Subject") {
+            let disposableBag = DisposeBag()
+            let subject = ReplaySubject<String>.create(bufferSize: 1)
+            
+            subject.subscribe(onNext: {print("First subscription:", $0)}).disposed(by: disposableBag)
+            subject.onNext("a")
+            subject.onNext("b")
+            
+            subject.subscribe(onNext: {print("Second subscription:", $0)}).disposed(by: disposableBag)
+            subject.onNext("c")
+            subject.onNext("d")
+            
+//            First subscription: a
+//            First subscription: b
+//            Second subscription: b
+//            First subscription: c
+//            Second subscription: c
+//            First subscription: d
+//            Second subscription: d
+            
+            let subject2 = ReplaySubject<Int>.create(bufferSize: 3)
+            subject2.onNext(1)
+            subject2.onNext(2)
+            subject2.onNext(3)
+            subject2.onNext(4)
+            subject2.subscribe(onNext: {print($0)}).disposed(by: disposableBag)
+            
+//            2
+//            3
+//            4
+        }
+        
+//        Variable is a wrapper for BehaviorSubject.
+        example("Vatibles") {
+            let disposableBag = DisposeBag()
+            let variable = Variable("A")
+            variable.asObservable().subscribe(onNext: {print($0)}).disposed(by: disposableBag)
+            variable.value = "B"
+        }
+//        A
+//        B
         
     }
     
