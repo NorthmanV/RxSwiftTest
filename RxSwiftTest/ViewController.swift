@@ -15,6 +15,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         startExamples()
         subjectsExamples()
+        sideEffectExample()
     }
     
     func startExamples() {
@@ -224,6 +225,24 @@ class ViewController: UIViewController {
 //        A
 //        B
         
+    }
+    
+    func sideEffectExample() {
+        example("Side Effect") {
+            let disposableBag = DisposeBag()
+            let observable = Observable.from([0, 32, 100])
+            
+            observable.do(onNext: {
+                print("\($0)F = ", terminator: "")
+            }).map({
+                Double($0 - 32) * 5 / 9.0
+            }).subscribe(onNext: {
+                print(String(format: "%.1f", $0))
+            }).disposed(by: disposableBag)
+//            0F = -17.8
+//            32F = 0.0
+//            100F = 37.8
+        }
     }
     
     func example(_ rxOperator: String, action: () -> ()) {
